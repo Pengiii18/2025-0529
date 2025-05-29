@@ -6,9 +6,9 @@ let currentSelection = ""; // 左或右的選擇
 let selected = false;
 
 function setup() {
-  createCanvas(640, 480);
+  createCanvas(windowWidth, windowHeight);
   video = createCapture(VIDEO);
-  video.size(width, height);
+  video.size(windowWidth, windowHeight);
   video.hide();
 
   handpose = ml5.handpose(video, modelReady);
@@ -18,6 +18,11 @@ function setup() {
 
   textAlign(CENTER, CENTER);
   textSize(24);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  video.size(windowWidth, windowHeight);
 }
 
 function modelReady() {
@@ -34,15 +39,26 @@ function draw() {
 }
 
 function drawOptions() {
-  fill(currentSelection === "left" ? "lime" : "white");
-  rect(50, 150, 200, 180, 20);
+  // 左上方白板（正確）
+  fill(255);
+  rect(50, 50, 200, 180, 20);
   fill(0);
-  text("互動白板", 150, 240);
+  text("正確", 150, 140);
 
-  fill(currentSelection === "right" ? "lime" : "white");
-  rect(390, 150, 200, 180, 20);
+  // 右上方白板（錯誤）
+  fill(255);
+  rect(width - 250, 50, 200, 180, 20);
   fill(0);
-  text("投影機", 490, 240);
+  text("錯誤", width - 150, 140);
+
+  // 綠燈或紅燈顯示
+  if (currentSelection === "left") {
+    fill(0, 255, 0); // 綠燈
+    ellipse(150, 60, 30, 30);
+  } else if (currentSelection === "right") {
+    fill(255, 0, 0); // 紅燈
+    ellipse(width - 150, 60, 30, 30);
+  }
 }
 
 function drawHands() {
@@ -62,11 +78,15 @@ function checkSelectionGesture() {
   if (predictions.length > 0) {
     let index = predictions[0].landmarks[8]; // 食指尖端
     let x = index[0];
-    if (x < width / 3) {
+    // 判斷是否在左上白板
+    if (x > 50 && x < 250) {
       currentSelection = "left";
-    } else if (x > 2 * width / 3) {
+    }
+    // 判斷是否在右上白板
+    else if (x > width - 250 && x < width - 50) {
       currentSelection = "right";
-    } else {
+    }
+    else {
       currentSelection = "";
     }
   }
@@ -91,5 +111,9 @@ function checkClapToConfirm() {
 
 function nextRound() {
   // TODO: 下一關邏輯可寫在這邊
-  alert("你選擇了：" + (currentSelection === "left" ? "互動白板" : "投影機"));
+  if (currentSelection === "left") {
+    alert("你選擇了：正確");
+  } else if (currentSelection === "right") {
+    alert("你選擇了：錯誤");
+  }
 }
