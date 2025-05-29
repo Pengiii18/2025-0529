@@ -29,14 +29,51 @@ function draw() {
   background(220);
   image(capture, 0, 0, width, height);
 
-  // 繪製手部20個節點
+  // 繪製手部20個節點與骨架
   for (let i = 0; i < predictions.length; i++) {
     const hand = predictions[i];
+
+    // 畫圓
     for (let j = 0; j < hand.landmarks.length; j++) {
       const [x, y] = hand.landmarks[j];
       fill(0, 255, 0);
       noStroke();
       ellipse(x, y, 10, 10);
+    }
+
+    // 畫骨架
+    stroke(0, 0, 255);
+    strokeWeight(3);
+    for (let k = 0; k < hand.annotations.thumb.length - 1; k++) {
+      let [x1, y1] = hand.annotations.thumb[k];
+      let [x2, y2] = hand.annotations.thumb[k + 1];
+      line(x1, y1, x2, y2);
+    }
+    for (let k = 0; k < hand.annotations.indexFinger.length - 1; k++) {
+      let [x1, y1] = hand.annotations.indexFinger[k];
+      let [x2, y2] = hand.annotations.indexFinger[k + 1];
+      line(x1, y1, x2, y2);
+    }
+    for (let k = 0; k < hand.annotations.middleFinger.length - 1; k++) {
+      let [x1, y1] = hand.annotations.middleFinger[k];
+      let [x2, y2] = hand.annotations.middleFinger[k + 1];
+      line(x1, y1, x2, y2);
+    }
+    for (let k = 0; k < hand.annotations.ringFinger.length - 1; k++) {
+      let [x1, y1] = hand.annotations.ringFinger[k];
+      let [x2, y2] = hand.annotations.ringFinger[k + 1];
+      line(x1, y1, x2, y2);
+    }
+    for (let k = 0; k < hand.annotations.pinky.length - 1; k++) {
+      let [x1, y1] = hand.annotations.pinky[k];
+      let [x2, y2] = hand.annotations.pinky[k + 1];
+      line(x1, y1, x2, y2);
+    }
+    // 掌心骨架
+    for (let k = 0; k < hand.annotations.palmBase.length; k++) {
+      let [x1, y1] = hand.landmarks[0];
+      let [x2, y2] = hand.annotations.palmBase[k];
+      line(x1, y1, x2, y2);
     }
   }
 }
