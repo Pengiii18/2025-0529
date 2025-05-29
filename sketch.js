@@ -58,6 +58,7 @@ function draw() {
   drawHands();
   if (!quizFinished) {
     drawQuestion();
+    drawHint(); // 新增：顯示操作提示
   }
   // 回饋訊息優先顯示，且暫停互動與題目切換
   if (showResult) {
@@ -91,21 +92,37 @@ function drawQuestion() {
 }
 
 function drawOptions() {
-  // 白板尺寸
-  const boardW = 120;
-  const boardH = 80;
+  // 白板尺寸（放大）
+  const boardW = 180;
+  const boardH = 120;
   const margin = 20;
 
   // 左上方白板（對）
-  fill(255);
+  if (currentSelection === "left") {
+    fill(180, 255, 180); // 高亮
+    stroke(0, 255, 0);
+    strokeWeight(4);
+  } else {
+    fill(255);
+    noStroke();
+  }
   rect(margin, margin, boardW, boardH, 16);
   fill(0);
+  noStroke();
   text("對", margin + boardW / 2, margin + boardH / 2);
 
   // 右上方白板（錯）
-  fill(255);
+  if (currentSelection === "right") {
+    fill(255, 180, 180); // 高亮
+    stroke(255, 0, 0);
+    strokeWeight(4);
+  } else {
+    fill(255);
+    noStroke();
+  }
   rect(width - margin - boardW, margin, boardW, boardH, 16);
   fill(0);
+  noStroke();
   text("錯", width - margin - boardW / 2, margin + boardH / 2);
 
   // 綠燈或紅燈顯示
@@ -116,6 +133,13 @@ function drawOptions() {
     fill(255, 0, 0); // 紅燈
     ellipse(width - margin - boardW / 2, margin - 10, 24, 24);
   }
+}
+
+function drawHint() {
+  fill(255, 255, 0);
+  textSize(18);
+  text("請將食指移到左上或右上區域選擇答案\n再雙手合掌以確認", width / 2, height - 60);
+  textSize(24);
 }
 
 function drawHands() {
@@ -136,8 +160,8 @@ function checkSelectionGesture() {
     let index = predictions[0].landmarks[8]; // 食指尖端
     let x = index[0];
     let y = index[1];
-    const boardW = 120;
-    const boardH = 80;
+    const boardW = 180;
+    const boardH = 120;
     const margin = 20;
     // 判斷是否在左上白板
     if (x > margin && x < margin + boardW && y > margin && y < margin + boardH) {
@@ -160,7 +184,7 @@ function checkClapToConfirm() {
     let hand2 = predictions[1].landmarks[0]; // 右手掌心
     let d = dist(hand1[0], hand1[1], hand2[0], hand2[1]);
 
-    if (d < 60 && currentSelection !== "") {
+    if (d < 100 && currentSelection !== "") { // 門檻放寬
       selected = true;
       checkAnswer();
       // 顯示回饋後自動進入下一題
