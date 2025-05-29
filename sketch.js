@@ -61,7 +61,7 @@ function draw() {
   }
   if (showResult) {
     fill(255);
-    textSize(48);
+    textSize(40);
     text(resultText, width / 2, height / 2);
     textSize(24);
   }
@@ -69,7 +69,7 @@ function draw() {
   checkClapToConfirm();
   if (quizFinished) {
     fill(255, 255, 0);
-    textSize(40);
+    textSize(36);
     text("所有題目作答完畢！", width / 2, height / 2);
     textSize(24);
   }
@@ -77,10 +77,11 @@ function draw() {
 
 function drawQuestion() {
   fill(255);
-  textSize(28);
-  text(`第 ${currentQuestion + 1} 題 / ${questions.length}`, width / 2, height / 2 - 80);
-  textSize(32);
-  text(questions[currentQuestion], width / 2, height / 2 - 20, width * 0.8, 200);
+  textSize(22);
+  text(`第 ${currentQuestion + 1} 題 / ${questions.length}`, width / 2, height / 2 - 70);
+  textSize(26);
+  // 題目顯示區域限制在中央 60% 寬度、高度 100px 內自動換行
+  text(questions[currentQuestion], width / 2, height / 2 - 20, width * 0.6, 100);
   textSize(24);
 }
 
