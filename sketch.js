@@ -29,16 +29,16 @@ function draw() {
   background(220);
   image(capture, 0, 0, width, height);
 
-  // 繪製手部20個節點與骨架
+  // 若有偵測到手，於每個手指關節畫圈圈
   for (let i = 0; i < predictions.length; i++) {
     const hand = predictions[i];
-
-    // 畫圓
+    // 畫每個關節的圈圈
     for (let j = 0; j < hand.landmarks.length; j++) {
       const [x, y] = hand.landmarks[j];
-      fill(0, 255, 0);
-      noStroke();
-      ellipse(x, y, 10, 10);
+      fill(255, 0, 0, 180);
+      stroke(255);
+      strokeWeight(2);
+      ellipse(x, y, 20, 20);
     }
 
     // 畫骨架
@@ -69,7 +69,6 @@ function draw() {
       let [x2, y2] = hand.annotations.pinky[k + 1];
       line(x1, y1, x2, y2);
     }
-    // 掌心骨架
     for (let k = 0; k < hand.annotations.palmBase.length; k++) {
       let [x1, y1] = hand.landmarks[0];
       let [x2, y2] = hand.annotations.palmBase[k];
