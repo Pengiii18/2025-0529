@@ -6,14 +6,13 @@ function setup() {
   createCanvas(400, 400);
   capture = createCapture(VIDEO);
   capture.size(400, 400);
-  capture.hide();
-
   handposeModel = ml5.handpose(capture, modelReady);
   handposeModel.on("predict", gotResults);
 }
 
 function modelReady() {
   console.log("Handpose model loaded!");
+  capture.hide();
 }
 
 function gotResults(results) {
