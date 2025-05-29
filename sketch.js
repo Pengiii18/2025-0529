@@ -39,25 +39,30 @@ function draw() {
 }
 
 function drawOptions() {
+  // 白板尺寸
+  const boardW = 120;
+  const boardH = 80;
+  const margin = 20;
+
   // 左上方白板（正確）
   fill(255);
-  rect(50, 50, 200, 180, 20);
+  rect(margin, margin, boardW, boardH, 16);
   fill(0);
-  text("正確", 150, 140);
+  text("正確", margin + boardW / 2, margin + boardH / 2);
 
   // 右上方白板（錯誤）
   fill(255);
-  rect(width - 250, 50, 200, 180, 20);
+  rect(width - margin - boardW, margin, boardW, boardH, 16);
   fill(0);
-  text("錯誤", width - 150, 140);
+  text("錯誤", width - margin - boardW / 2, margin + boardH / 2);
 
   // 綠燈或紅燈顯示
   if (currentSelection === "left") {
     fill(0, 255, 0); // 綠燈
-    ellipse(150, 60, 30, 30);
+    ellipse(margin + boardW / 2, margin - 10, 24, 24);
   } else if (currentSelection === "right") {
     fill(255, 0, 0); // 紅燈
-    ellipse(width - 150, 60, 30, 30);
+    ellipse(width - margin - boardW / 2, margin - 10, 24, 24);
   }
 }
 
@@ -78,12 +83,16 @@ function checkSelectionGesture() {
   if (predictions.length > 0) {
     let index = predictions[0].landmarks[8]; // 食指尖端
     let x = index[0];
+    let y = index[1];
+    const boardW = 120;
+    const boardH = 80;
+    const margin = 20;
     // 判斷是否在左上白板
-    if (x > 50 && x < 250) {
+    if (x > margin && x < margin + boardW && y > margin && y < margin + boardH) {
       currentSelection = "left";
     }
     // 判斷是否在右上白板
-    else if (x > width - 250 && x < width - 50) {
+    else if (x > width - margin - boardW && x < width - margin && y > margin && y < margin + boardH) {
       currentSelection = "right";
     }
     else {
