@@ -77,11 +77,11 @@ function draw() {
 
 function drawQuestion() {
   fill(255);
-  textSize(22);
-  text(`第 ${currentQuestion + 1} 題 / ${questions.length}`, width / 2, height / 2 - 70);
-  textSize(26);
-  // 題目顯示區域限制在中央 60% 寬度、高度 100px 內自動換行
-  text(questions[currentQuestion], width / 2, height / 2 - 20, width * 0.6, 100);
+  textSize(18);
+  text(`第 ${currentQuestion + 1} 題 / ${questions.length}`, width / 2, height / 2 - 60);
+  textSize(20);
+  // 題目顯示區域限制在中央 60% 寬度、高度 60px 內自動換行
+  text(questions[currentQuestion], width / 2, height / 2 - 20, width * 0.6, 60);
   textSize(24);
 }
 
@@ -157,6 +157,7 @@ function checkClapToConfirm() {
     if (d < 60 && currentSelection !== "") {
       selected = true;
       checkAnswer();
+      // 顯示回饋後自動進入下一題
       setTimeout(() => {
         selected = false;
         nextRound();
