@@ -59,11 +59,14 @@ function draw() {
   if (!quizFinished) {
     drawQuestion();
   }
+  // 回饋訊息優先顯示，且暫停互動與題目切換
   if (showResult) {
     fill(255);
     textSize(40);
     text(resultText, width / 2, height / 2);
     textSize(24);
+    // 不要在 showResult 時呼叫 checkSelectionGesture 與 checkClapToConfirm
+    return;
   }
   checkSelectionGesture();
   checkClapToConfirm();
@@ -80,8 +83,10 @@ function drawQuestion() {
   textSize(18);
   text(`第 ${currentQuestion + 1} 題 / ${questions.length}`, width / 2, height / 2 - 60);
   textSize(20);
-  // 題目顯示區域限制在中央 60% 寬度、高度 60px 內自動換行
+  // 讓題目內文置中顯示
+  textAlign(CENTER, CENTER);
   text(questions[currentQuestion], width / 2, height / 2 - 20, width * 0.6, 60);
+  textAlign(CENTER, CENTER); // 保持後續繪製置中
   textSize(24);
 }
 
@@ -149,6 +154,7 @@ function checkSelectionGesture() {
 }
 
 function checkClapToConfirm() {
+  // 僅在未顯示回饋且未完成時才可互動
   if (predictions.length >= 2 && !selected && !showResult && !quizFinished) {
     let hand1 = predictions[0].landmarks[0]; // 左手掌心
     let hand2 = predictions[1].landmarks[0]; // 右手掌心
@@ -159,8 +165,13 @@ function checkClapToConfirm() {
       checkAnswer();
       // 顯示回饋後自動進入下一題
       setTimeout(() => {
+        showResult = false;
         selected = false;
-        nextRound();
+        currentSelection = "";
+        currentQuestion++;
+        if (currentQuestion >= questions.length) {
+          quizFinished = true;
+        }
       }, 1200);
     }
   }
@@ -174,13 +185,4 @@ function checkAnswer() {
     resultText = "歐歐，答錯瞜QQ";
   }
   showResult = true;
-}
-
-function nextRound() {
-  showResult = false;
-  currentSelection = "";
-  currentQuestion++;
-  if (currentQuestion >= questions.length) {
-    quizFinished = true;
-  }
 }
