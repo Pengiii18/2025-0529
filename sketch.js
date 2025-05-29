@@ -27,6 +27,8 @@ let showResult = false;
 let resultText = "";
 let quizFinished = false;
 
+let selectionStartTime = null; // 新增：記錄選擇開始時間
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   video = createCapture(VIDEO);
@@ -58,7 +60,7 @@ function draw() {
   drawHands();
   if (!quizFinished) {
     drawQuestion();
-    drawHint(); // 新增：顯示操作提示
+    drawHint();
   }
   // 回饋訊息優先顯示，且暫停互動與題目切換
   if (showResult) {
@@ -66,11 +68,10 @@ function draw() {
     textSize(40);
     text(resultText, width / 2, height / 2);
     textSize(24);
-    // 不要在 showResult 時呼叫 checkSelectionGesture 與 checkClapToConfirm
     return;
   }
   checkSelectionGesture();
-  checkClapToConfirm();
+  checkSelectionHoldToConfirm(); // 新增：檢查停留確認
   if (quizFinished) {
     fill(255, 255, 0);
     textSize(36);
@@ -138,7 +139,7 @@ function drawOptions() {
 function drawHint() {
   fill(255, 255, 0);
   textSize(18);
-  text("請將食指移到左上或右上區域選擇答案\n再雙手合掌以確認", width / 2, height - 60);
+  text("請將食指移到左上或右上區域選擇答案\n停留3秒自動確認", width / 2, height - 60);
   textSize(24);
 }
 
@@ -163,6 +164,7 @@ function checkSelectionGesture() {
     const boardW = 180;
     const boardH = 120;
     const margin = 20;
+    let prevSelection = currentSelection;
     // 判斷是否在左上白板
     if (x > margin && x < margin + boardW && y > margin && y < margin + boardH) {
       currentSelection = "left";
@@ -174,24 +176,44 @@ function checkSelectionGesture() {
     else {
       currentSelection = "";
     }
+    // 若選擇變動，重設計時
+    if (currentSelection !== prevSelection) {
+      selectionStartTime = currentSelection ? millis() : null;
+      selected = false;
+    }
+  } else {
+    currentSelection = "";
+    selectionStartTime = null;
+    selected = false;
   }
 }
 
-function checkClapToConfirm() {
-  // 僅在未顯示回饋且未完成時才可互動
-  if (predictions.length >= 2 && !selected && !showResult && !quizFinished) {
-    let hand1 = predictions[0].landmarks[0]; // 左手掌心
-    let hand2 = predictions[1].landmarks[0]; // 右手掌心
-    let d = dist(hand1[0], hand1[1], hand2[0], hand2[1]);
-
-    if (d < 100 && currentSelection !== "") { // 門檻放寬
+// 新增：檢查是否在選擇區域停留3秒
+function checkSelectionHoldToConfirm() {
+  if (
+    currentSelection !== "" &&
+    !selected &&
+    !showResult &&
+    !quizFinished &&
+    selectionStartTime !== null
+  ) {
+    let holdTime = millis() - selectionStartTime;
+    // 顯示倒數提示
+    fill(255, 255, 0);
+    textSize(20);
+    let sec = Math.ceil((3000 - holdTime) / 1000);
+    if (sec > 0) {
+      text(`將於 ${sec} 秒後自動確認`, width / 2, 40);
+    }
+    // 停留3秒自動確認
+    if (holdTime >= 3000) {
       selected = true;
       checkAnswer();
-      // 顯示回饋後自動進入下一題
       setTimeout(() => {
         showResult = false;
         selected = false;
         currentSelection = "";
+        selectionStartTime = null;
         currentQuestion++;
         if (currentQuestion >= questions.length) {
           quizFinished = true;
