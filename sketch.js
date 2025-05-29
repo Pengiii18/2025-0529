@@ -3,11 +3,16 @@ let handposeModel;
 let predictions = [];
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(windowWidth, windowHeight);
   capture = createCapture(VIDEO);
-  capture.size(400, 400);
+  capture.size(windowWidth, windowHeight);
   handposeModel = ml5.handpose(capture, modelReady);
   handposeModel.on("predict", gotResults);
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  capture.size(windowWidth, windowHeight);
 }
 
 function modelReady() {
