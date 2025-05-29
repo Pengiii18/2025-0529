@@ -5,6 +5,28 @@ let predictions = [];
 let currentSelection = ""; // 左或右的選擇
 let selected = false;
 
+// 題目與答案
+const questions = [
+  '淡江大學教育科技學系的英文名稱是 "Department of Educational Engineering"。',
+  "教育科技學系強調的是科技與教學的整合應用。",
+  "教育科技學系的學生主要學習傳統教學法，不太接觸科技應用。",
+  "淡江教育科技學系的學生可以學習程式設計與遊戲設計相關課程。",
+  "該系只針對教師職涯發展設計課程，沒有其他就業方向。",
+  "教育科技學系有提供師資培育課程，學生可取得教學資格。",
+  "該系在實習課程上完全不涉及實際操作或專題製作。",
+  "淡江教育科技學系隸屬於文學院。",
+  "教育科技學系的課程涵蓋數位學習平台的開發與應用。",
+  "該系設有專屬實驗室，如教學媒體實驗室與互動科技實驗室。"
+];
+const answers = [
+  "錯", "對", "錯", "對", "錯", "對", "錯", "錯", "對", "對"
+];
+
+let currentQuestion = 0;
+let showResult = false;
+let resultText = "";
+let quizFinished = false;
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   video = createCapture(VIDEO);
@@ -34,8 +56,32 @@ function draw() {
   image(video, 0, 0, width, height);
   drawOptions();
   drawHands();
+  if (!quizFinished) {
+    drawQuestion();
+  }
+  if (showResult) {
+    fill(255);
+    textSize(48);
+    text(resultText, width / 2, height / 2);
+    textSize(24);
+  }
   checkSelectionGesture();
   checkClapToConfirm();
+  if (quizFinished) {
+    fill(255, 255, 0);
+    textSize(40);
+    text("所有題目作答完畢！", width / 2, height / 2);
+    textSize(24);
+  }
+}
+
+function drawQuestion() {
+  fill(255);
+  textSize(28);
+  text(`第 ${currentQuestion + 1} 題 / ${questions.length}`, width / 2, height / 2 - 80);
+  textSize(32);
+  text(questions[currentQuestion], width / 2, height / 2 - 20, width * 0.8, 200);
+  textSize(24);
 }
 
 function drawOptions() {
@@ -44,17 +90,17 @@ function drawOptions() {
   const boardH = 80;
   const margin = 20;
 
-  // 左上方白板（正確）
+  // 左上方白板（對）
   fill(255);
   rect(margin, margin, boardW, boardH, 16);
   fill(0);
-  text("正確", margin + boardW / 2, margin + boardH / 2);
+  text("對", margin + boardW / 2, margin + boardH / 2);
 
-  // 右上方白板（錯誤）
+  // 右上方白板（錯）
   fill(255);
   rect(width - margin - boardW, margin, boardW, boardH, 16);
   fill(0);
-  text("錯誤", width - margin - boardW / 2, margin + boardH / 2);
+  text("錯", width - margin - boardW / 2, margin + boardH / 2);
 
   // 綠燈或紅燈顯示
   if (currentSelection === "left") {
@@ -80,7 +126,7 @@ function drawHands() {
 }
 
 function checkSelectionGesture() {
-  if (predictions.length > 0) {
+  if (predictions.length > 0 && !showResult && !quizFinished) {
     let index = predictions[0].landmarks[8]; // 食指尖端
     let x = index[0];
     let y = index[1];
@@ -102,27 +148,37 @@ function checkSelectionGesture() {
 }
 
 function checkClapToConfirm() {
-  if (predictions.length >= 2 && !selected) {
+  if (predictions.length >= 2 && !selected && !showResult && !quizFinished) {
     let hand1 = predictions[0].landmarks[0]; // 左手掌心
     let hand2 = predictions[1].landmarks[0]; // 右手掌心
     let d = dist(hand1[0], hand1[1], hand2[0], hand2[1]);
 
     if (d < 60 && currentSelection !== "") {
       selected = true;
-      console.log("✅ 選擇了：" + currentSelection);
+      checkAnswer();
       setTimeout(() => {
         selected = false;
         nextRound();
-      }, 1000);
+      }, 1200);
     }
   }
 }
 
+function checkAnswer() {
+  let userAns = currentSelection === "left" ? "對" : "錯";
+  if (userAns === answers[currentQuestion]) {
+    resultText = "答對了！";
+  } else {
+    resultText = "歐歐，答錯瞜QQ";
+  }
+  showResult = true;
+}
+
 function nextRound() {
-  // TODO: 下一關邏輯可寫在這邊
-  if (currentSelection === "left") {
-    alert("你選擇了：正確");
-  } else if (currentSelection === "right") {
-    alert("你選擇了：錯誤");
+  showResult = false;
+  currentSelection = "";
+  currentQuestion++;
+  if (currentQuestion >= questions.length) {
+    quizFinished = true;
   }
 }
