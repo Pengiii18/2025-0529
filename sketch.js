@@ -58,20 +58,21 @@ function draw() {
   image(video, 0, 0, width, height);
   drawOptions();
   drawHands();
-  if (!quizFinished) {
-    drawQuestion();
-    drawHint();
-  }
   // 回饋訊息優先顯示，且暫停互動與題目切換
   if (showResult) {
+    // 只顯示回饋，不顯示題目
     fill(255);
-    textSize(40);
+    textSize(48);
     text(resultText, width / 2, height / 2);
     textSize(24);
     return;
   }
+  if (!quizFinished) {
+    drawQuestion();
+    drawHint();
+  }
   checkSelectionGesture();
-  checkSelectionHoldToConfirm(); // 新增：檢查停留確認
+  checkSelectionHoldToConfirm();
   if (quizFinished) {
     fill(255, 255, 0);
     textSize(36);
@@ -218,7 +219,7 @@ function checkSelectionHoldToConfirm() {
         if (currentQuestion >= questions.length) {
           quizFinished = true;
         }
-      }, 1200);
+      }, 2000); // 顯示回饋2秒
     }
   }
 }
