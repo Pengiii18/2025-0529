@@ -24,4 +24,15 @@ function gotResults(results) {
 function draw() {
   background(220);
   image(capture, 0, 0, width, height);
+
+  // 繪製手部20個節點
+  for (let i = 0; i < predictions.length; i++) {
+    const hand = predictions[i];
+    for (let j = 0; j < hand.landmarks.length; j++) {
+      const [x, y] = hand.landmarks[j];
+      fill(0, 255, 0);
+      noStroke();
+      ellipse(x, y, 10, 10);
+    }
+  }
 }
