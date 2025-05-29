@@ -1,78 +1,95 @@
-let capture;
-let handposeModel;
+let video;
+let handpose;
 let predictions = [];
 
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-  capture = createCapture(VIDEO);
-  capture.size(windowWidth, windowHeight);
-  handposeModel = ml5.handpose(capture, modelReady);
-  handposeModel.on("predict", gotResults);
-}
+let currentSelection = ""; // 左或右的選擇
+let selected = false;
 
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  capture.size(windowWidth, windowHeight);
+function setup() {
+  createCanvas(640, 480);
+  video = createCapture(VIDEO);
+  video.size(width, height);
+  video.hide();
+
+  handpose = ml5.handpose(video, modelReady);
+  handpose.on("predict", results => {
+    predictions = results;
+  });
+
+  textAlign(CENTER, CENTER);
+  textSize(24);
 }
 
 function modelReady() {
-  console.log("Handpose model loaded!");
-  capture.hide();
-}
-
-function gotResults(results) {
-  predictions = results;
-  console.log(predictions);
+  console.log("🤖 Handpose model ready!");
 }
 
 function draw() {
-  background(220);
-  image(capture, 0, 0, width, height);
+  background(0);
+  image(video, 0, 0, width, height);
+  drawOptions();
+  drawHands();
+  checkSelectionGesture();
+  checkClapToConfirm();
+}
 
-  // 若有偵測到手，於每個手指關節畫圈圈
-  for (let i = 0; i < predictions.length; i++) {
-    const hand = predictions[i];
-    // 畫每個關節的圈圈
-    for (let j = 0; j < hand.landmarks.length; j++) {
-      const [x, y] = hand.landmarks[j];
-      fill(255, 0, 0, 180);
-      stroke(255);
-      strokeWeight(2);
-      ellipse(x, y, 20, 20);
-    }
+function drawOptions() {
+  fill(currentSelection === "left" ? "lime" : "white");
+  rect(50, 150, 200, 180, 20);
+  fill(0);
+  text("互動白板", 150, 240);
 
-    // 畫骨架
-    stroke(0, 0, 255);
-    strokeWeight(3);
-    for (let k = 0; k < hand.annotations.thumb.length - 1; k++) {
-      let [x1, y1] = hand.annotations.thumb[k];
-      let [x2, y2] = hand.annotations.thumb[k + 1];
-      line(x1, y1, x2, y2);
-    }
-    for (let k = 0; k < hand.annotations.indexFinger.length - 1; k++) {
-      let [x1, y1] = hand.annotations.indexFinger[k];
-      let [x2, y2] = hand.annotations.indexFinger[k + 1];
-      line(x1, y1, x2, y2);
-    }
-    for (let k = 0; k < hand.annotations.middleFinger.length - 1; k++) {
-      let [x1, y1] = hand.annotations.middleFinger[k];
-      let [x2, y2] = hand.annotations.middleFinger[k + 1];
-      line(x1, y1, x2, y2);
-    }
-    for (let k = 0; k < hand.annotations.ringFinger.length - 1; k++) {
-      let [x1, y1] = hand.annotations.ringFinger[k];
-      let [x2, y2] = hand.annotations.ringFinger[k + 1];
-      line(x1, y1, x2, y2);
-    }
-    for (let k = 0; k < hand.annotations.pinky.length - 1; k++) {
-      let [x1, y1] = hand.annotations.pinky[k];
-      let [x2, y2] = hand.annotations.pinky[k + 1];
-      line(x1, y1, x2, y2);
-    }
-    for (let k = 0; k < hand.annotations.palmBase.length; k++) {
-      let [x1, y1] = hand.landmarks[0];
-      let [x2, y2] = hand.annotations.palmBase[k];
-      line(x1, y1, x2, y2);
+  fill(currentSelection === "right" ? "lime" : "white");
+  rect(390, 150, 200, 180, 20);
+  fill(0);
+  text("投影機", 490, 240);
+}
+
+function drawHands() {
+  if (predictions.length > 0) {
+    for (let hand of predictions) {
+      for (let i = 0; i < hand.landmarks.length; i++) {
+        let [x, y] = hand.landmarks[i];
+        fill(255, 0, 0);
+        noStroke();
+        ellipse(x, y, 10, 10);
+      }
     }
   }
+}
+
+function checkSelectionGesture() {
+  if (predictions.length > 0) {
+    let index = predictions[0].landmarks[8]; // 食指尖端
+    let x = index[0];
+    if (x < width / 3) {
+      currentSelection = "left";
+    } else if (x > 2 * width / 3) {
+      currentSelection = "right";
+    } else {
+      currentSelection = "";
+    }
+  }
+}
+
+function checkClapToConfirm() {
+  if (predictions.length >= 2 && !selected) {
+    let hand1 = predictions[0].landmarks[0]; // 左手掌心
+    let hand2 = predictions[1].landmarks[0]; // 右手掌心
+    let d = dist(hand1[0], hand1[1], hand2[0], hand2[1]);
+
+    if (d < 60 && currentSelection !== "") {
+      selected = true;
+      console.log("✅ 選擇了：" + currentSelection);
+      setTimeout(() => {
+        selected = false;
+        nextRound();
+      }, 1000);
+    }
+  }
+}
+
+function nextRound() {
+  // TODO: 下一關邏輯可寫在這邊
+  alert("你選擇了：" + (currentSelection === "left" ? "互動白板" : "投影機"));
 }
