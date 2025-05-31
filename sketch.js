@@ -5,6 +5,11 @@ let predictions = [];
 let currentSelection = ""; // 左或右的選擇
 let selected = false;
 
+// 首頁狀態
+let showHome = true;
+let homeSelection = false;
+let homeSelectionStartTime = null;
+
 // 題目與答案
 const questions = [
   '淡江大學教育科技學系的英文名稱是 "Department of Educational Engineering"。',
@@ -56,6 +61,14 @@ function modelReady() {
 function draw() {
   background(0);
   image(video, 0, 0, width, height);
+
+  if (showHome) {
+    drawHome();
+    checkHomeSelectionGesture();
+    checkHomeSelectionHoldToConfirm();
+    return;
+  }
+
   drawOptions();
   drawHands();
   // 回饋訊息優先顯示，且暫停互動與題目切換
@@ -79,6 +92,48 @@ function draw() {
     text("所有題目作答完畢！", width / 2, height / 2);
     textSize(24);
   }
+}
+
+// 首頁繪製
+function drawHome() {
+  // 標題
+  fill(255, 255, 0);
+  textSize(40);
+  textAlign(CENTER, CENTER);
+  text("教育科技學系知識王", width / 2, height / 2 - 120);
+
+  // 互動方塊
+  const boxW = 240;
+  const boxH = 100;
+  const boxX = width / 2 - boxW / 2;
+  const boxY = height / 2 - boxH / 2;
+
+  if (homeSelection) {
+    fill(180, 255, 180);
+    stroke(0, 255, 0);
+    strokeWeight(4);
+  } else {
+    fill(255);
+    noStroke();
+  }
+  rect(boxX, boxY, boxW, boxH, 20);
+
+  fill(0);
+  noStroke();
+  textSize(32);
+  text("進入遊戲", width / 2, height / 2);
+
+  // 綠燈顯示
+  if (homeSelection) {
+    fill(0, 255, 0);
+    ellipse(width / 2, boxY - 30, 24, 24);
+  }
+
+  // 提示
+  fill(255, 255, 0);
+  textSize(18);
+  text("請將食指移到方塊上，停留3秒進入遊戲", width / 2, height / 2 + 90);
+  textSize(24);
 }
 
 function drawQuestion() {
@@ -226,6 +281,49 @@ function checkSelectionHoldToConfirm() {
           quizFinished = true;
         }
       }, 2000); // 顯示回饋2秒
+    }
+  }
+}
+
+// 首頁手勢偵測
+function checkHomeSelectionGesture() {
+  if (predictions.length > 0 && showHome) {
+    let index = predictions[0].landmarks[8]; // 食指尖端
+    let x = index[0];
+    let y = index[1];
+    const boxW = 240;
+    const boxH = 100;
+    const boxX = width / 2 - boxW / 2;
+    const boxY = height / 2 - boxH / 2;
+    let prevSelection = homeSelection;
+    if (x > boxX && x < boxX + boxW && y > boxY && y < boxY + boxH) {
+      homeSelection = true;
+    } else {
+      homeSelection = false;
+    }
+    if (homeSelection !== prevSelection) {
+      homeSelectionStartTime = homeSelection ? millis() : null;
+    }
+  } else {
+    homeSelection = false;
+    homeSelectionStartTime = null;
+  }
+}
+
+// 首頁停留3秒自動進入遊戲
+function checkHomeSelectionHoldToConfirm() {
+  if (homeSelection && homeSelectionStartTime !== null && showHome) {
+    let holdTime = millis() - homeSelectionStartTime;
+    fill(255, 255, 0);
+    textSize(20);
+    let sec = Math.ceil((3000 - holdTime) / 1000);
+    if (sec > 0) {
+      text(`將於 ${sec} 秒後進入遊戲`, width / 2, height / 2 + 140);
+    }
+    if (holdTime >= 3000) {
+      showHome = false;
+      homeSelection = false;
+      homeSelectionStartTime = null;
     }
   }
 }
