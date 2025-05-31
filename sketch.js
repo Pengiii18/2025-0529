@@ -86,9 +86,15 @@ function drawQuestion() {
   textSize(18);
   text(`第 ${currentQuestion + 1} 題 / ${questions.length}`, width / 2, height / 2 - 60);
   textSize(20);
-  // 讓題目內文置中顯示
+  // 讓題目內文置中顯示（垂直與水平皆置中）
   textAlign(CENTER, CENTER);
-  text(questions[currentQuestion], width / 2, height / 2 - 20, width * 0.6, 60);
+  text(
+    questions[currentQuestion],
+    width / 2,
+    height / 2,           // 垂直中央
+    width * 0.6,          // 最大寬度
+    100                   // 最大高度，讓多行能垂直置中
+  );
   textAlign(CENTER, CENTER); // 保持後續繪製置中
   textSize(24);
 }
