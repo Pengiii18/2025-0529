@@ -60,6 +60,10 @@ function modelReady() {
 
 function draw() {
   background(0);
+
+  // 木頭風格邊框
+  drawWoodenFrame();
+
   image(video, 0, 0, width, height);
 
   if (showHome) {
@@ -92,6 +96,28 @@ function draw() {
     text("所有題目作答完畢！", width / 2, height / 2);
     textSize(24);
   }
+}
+
+// 木頭風格邊框繪製
+function drawWoodenFrame() {
+  // 外層深色
+  noFill();
+  stroke(102, 51, 0);
+  strokeWeight(32);
+  rect(0, 0, width, height, 40);
+
+  // 中層較淺
+  stroke(153, 102, 51);
+  strokeWeight(16);
+  rect(16, 16, width - 32, height - 32, 28);
+
+  // 內層亮色
+  stroke(204, 153, 102);
+  strokeWeight(8);
+  rect(32, 32, width - 64, height - 64, 16);
+
+  // 還原
+  noStroke();
 }
 
 // 首頁繪製
