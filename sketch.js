@@ -203,7 +203,7 @@ function drawQuestion() {
   textAlign(CENTER, CENTER);
   text(
     questions[currentQuestion],
-    width / 2,
+    width / 2 - 100,
     height / 2 - 10,
     width * 0.6,
     100
@@ -466,7 +466,7 @@ function drawHintBox() {
   let totalLineH = lines.length * 28;
   let startY = by + boxH/2 - totalLineH/2 + 4;
   for (let i = 0; i < lines.length; i++) {
-    text(lines[i], width / 2, startY + i * 28, txtW, 28);
+    text(lines[i], width / 2 - 100, startY + i * 28, txtW, 28);
   }
   pop();
   let closeX = bx + boxW - hintBoxCloseW - 16;
