@@ -205,7 +205,7 @@ function drawQuestion() {
   textAlign(CENTER, CENTER);
   text(
     questions[currentQuestion],
-    width / 2,
+    width / 2 - 100,
     height / 2 - 10,      // 調整y，讓多行能更居中
     width * 0.6,
     100                   // 區塊高度
@@ -472,7 +472,7 @@ function drawHintBox() {
   let totalLineH = lines.length * 28;
   let startY = by + boxH/2 - totalLineH/2 + 4;
   for (let i = 0; i < lines.length; i++) {
-    text(lines[i], bx + boxW/2, startY + i * 28, txtW, 28);
+    text(lines[i], bx + boxW/2 - 100, startY + i * 28, txtW, 28);
   }
   pop();
   // 關閉按鈕
