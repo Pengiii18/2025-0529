@@ -111,7 +111,6 @@ function draw() {
   drawHands();
   // 回饋訊息優先顯示，且暫停互動與題目切換
   if (showResult) {
-    // 只顯示回饋，不顯示題目
     fill(255);
     textSize(48);
     text(resultText, width / 2, height / 2);
@@ -201,16 +200,15 @@ function drawQuestion() {
   textSize(18);
   text(`第 ${currentQuestion + 1} 題 / ${questions.length}`, width / 2, height / 2 - 80);
   textSize(20);
-  // 讓題目內文置中顯示（垂直與水平皆置中）
   textAlign(CENTER, CENTER);
   text(
     questions[currentQuestion],
     width / 2,
-    height / 2 - 10,      // 調整y，讓多行能更居中
+    height / 2 - 10,
     width * 0.6,
-    100                   // 區塊高度
+    100
   );
-  textAlign(CENTER, CENTER); // 保持後續繪製置中
+  textAlign(CENTER, CENTER);
   textSize(24);
 }
 
@@ -222,7 +220,7 @@ function drawOptions() {
 
   // 左上方白板（對）
   if (currentSelection === "left") {
-    fill(180, 255, 180); // 高亮
+    fill(180, 255, 180);
     stroke(0, 255, 0);
     strokeWeight(4);
   } else {
@@ -232,11 +230,11 @@ function drawOptions() {
   rect(margin, margin, boardW, boardH, 16);
   fill(0);
   noStroke();
-  text("對", margin + boardW / 2, margin + boardH / 2);
+  text("對", width / 2 - 200, margin + boardH / 2); // X軸統一
 
   // 右上方白板（錯）
   if (currentSelection === "right") {
-    fill(255, 180, 180); // 高亮
+    fill(255, 180, 180);
     stroke(255, 0, 0);
     strokeWeight(4);
   } else {
@@ -246,15 +244,15 @@ function drawOptions() {
   rect(width - margin - boardW, margin, boardW, boardH, 16);
   fill(0);
   noStroke();
-  text("錯", width - margin - boardW / 2, margin + boardH / 2);
+  text("錯", width / 2 + 200, margin + boardH / 2); // X軸統一
 
   // 綠燈或紅燈顯示
   if (currentSelection === "left") {
-    fill(0, 255, 0); // 綠燈
-    ellipse(margin + boardW / 2, margin - 10, 24, 24);
+    fill(0, 255, 0);
+    ellipse(width / 2 - 200, margin - 10, 24, 24);
   } else if (currentSelection === "right") {
-    fill(255, 0, 0); // 紅燈
-    ellipse(width - margin - boardW / 2, margin - 10, 24, 24);
+    fill(255, 0, 0);
+    ellipse(width / 2 + 200, margin - 10, 24, 24);
   }
 }
 
@@ -320,7 +318,6 @@ function checkSelectionHoldToConfirm() {
     selectionStartTime !== null
   ) {
     let holdTime = millis() - selectionStartTime;
-    // 顯示倒數提示
     fill(255, 255, 0);
     textSize(20);
     let sec = Math.ceil((3000 - holdTime) / 1000);
@@ -441,12 +438,10 @@ function drawHintBox() {
   let boxH = hintBoxH;
   let bx = width/2 - boxW/2;
   let by = height/2 - boxH/2;
-  // 方框底
   fill(255,255,220);
   stroke(180,140,60);
   strokeWeight(4);
   rect(bx, by, boxW, boxH, 24);
-  // 文字
   fill(60,40,0);
   noStroke();
   textSize(20);
@@ -454,7 +449,6 @@ function drawHintBox() {
   let txt = hintTexts[currentQuestion];
   let txtW = boxW - 40;
   let txtH = boxH - 60;
-  // 計算自動換行
   push();
   let words = txt.split(/(?<=。|？|！|,|，|\s)/g);
   let lines = [];
@@ -472,12 +466,11 @@ function drawHintBox() {
   let totalLineH = lines.length * 28;
   let startY = by + boxH/2 - totalLineH/2 + 4;
   for (let i = 0; i < lines.length; i++) {
-    text(lines[i], bx + boxW/2, startY + i * 28, txtW, 28);
+    text(lines[i], width / 2, startY + i * 28, txtW, 28);
   }
   pop();
-  // 關閉按鈕
   let closeX = bx + boxW - hintBoxCloseW - 16;
-  let closeY = by + hintBoxH - hintBoxCloseH - 16;
+  let closeY = by + boxH - hintBoxCloseH - 16;
   fill(255, 180, 180);
   stroke(200,0,0);
   strokeWeight(2);
