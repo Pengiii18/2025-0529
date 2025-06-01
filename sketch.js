@@ -32,7 +32,33 @@ let showResult = false;
 let resultText = "";
 let quizFinished = false;
 
-let selectionStartTime = null; // 新增：記錄選擇開始時間
+// ====== 新增：提示模式相關變數 ======
+let hintButtonImg;
+let showHintBox = false;
+let hintButtonHoldStart = null;
+let closeHintHoldStart = null;
+const hintButtonW = 64;
+const hintButtonH = 64;
+const hintBoxW = 420;
+const hintBoxH = 180;
+const hintBoxCloseW = 80;
+const hintBoxCloseH = 40;
+const hintTexts = [
+  '注意校名與系名的正確翻譯方式，是否真的叫 "Engineering"？',
+  '想想這個系的名字：「教育」與「科技」結合意味著什麼？',
+  '名稱中有「科技」，這代表他們會完全忽略科技嗎？',
+  '課程中有「互動科技」、「遊戲化學習」等相關內容，你猜？',
+  '你覺得會不會還有像數位學習、科技業等其他出路？',
+  '想進入教育現場當老師？這個系有開設哪些相關訓練？',
+  '記得有「媒體實驗室」、「專題課程」等實作機會嗎？',
+  '教育科技比較偏向教育學與資訊，會屬於哪個學院？',
+  '數位學習是教育科技的核心之一，這點有沒有教？',
+  '想做互動教學或媒體設計，會不會需要這類空間？'
+];
+
+function preload() {
+  hintButtonImg = loadImage('1.png');
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -60,11 +86,19 @@ function modelReady() {
 
 function draw() {
   background(0);
-
-  // 木頭風格邊框
   drawWoodenFrame();
-
   image(video, 0, 0, width, height);
+
+  // ====== 畫面最左側中央的提示按鈕 ======
+  drawHintButton();
+  checkHintButtonGesture();
+
+  // 若提示框開啟，顯示提示框並暫停其他互動
+  if (showHintBox) {
+    drawHintBox();
+    checkCloseHintGesture();
+    return;
+  }
 
   if (showHome) {
     drawHome();
@@ -362,4 +396,102 @@ function checkAnswer() {
     resultText = "歐歐，答錯瞜QQ";
   }
   showResult = true;
+}
+
+// ====== 畫提示按鈕 ======
+function drawHintButton() {
+  let x = 24;
+  let y = height / 2 - hintButtonH / 2;
+  image(hintButtonImg, x, y, hintButtonW, hintButtonH);
+}
+
+// ====== 檢查手指是否碰觸提示按鈕並停留3秒 ======
+function checkHintButtonGesture() {
+  if (showHome || showResult || quizFinished || showHintBox) return;
+  if (predictions.length > 0) {
+    let index = predictions[0].landmarks[8];
+    let x = index[0];
+    let y = index[1];
+    let bx = 24;
+    let by = height / 2 - hintButtonH / 2;
+    if (x > bx && x < bx + hintButtonW && y > by && y < by + hintButtonH) {
+      if (!hintButtonHoldStart) hintButtonHoldStart = millis();
+      let holdTime = millis() - hintButtonHoldStart;
+      fill(255,255,0);
+      textSize(16);
+      let sec = Math.ceil((3000 - holdTime) / 1000);
+      if (sec > 0) {
+        text(`將於 ${sec} 秒後顯示提示`, bx + hintButtonW/2, by + hintButtonH + 20);
+      }
+      if (holdTime >= 3000) {
+        showHintBox = true;
+        hintButtonHoldStart = null;
+      }
+    } else {
+      hintButtonHoldStart = null;
+    }
+  } else {
+    hintButtonHoldStart = null;
+  }
+}
+
+// ====== 畫提示框 ======
+function drawHintBox() {
+  let bx = width/2 - hintBoxW/2;
+  let by = height/2 - hintBoxH/2;
+  // 方框底
+  fill(255,255,220);
+  stroke(180,140,60);
+  strokeWeight(4);
+  rect(bx, by, hintBoxW, hintBoxH, 24);
+  // 文字
+  fill(60,40,0);
+  noStroke();
+  textSize(20);
+  textAlign(CENTER, CENTER);
+  text(hintTexts[currentQuestion], bx + hintBoxW/2, by + hintBoxH/2 - 10, hintBoxW-40, hintBoxH-60);
+  // 關閉按鈕
+  let closeX = bx + hintBoxW - hintBoxCloseW - 16;
+  let closeY = by + hintBoxH - hintBoxCloseH - 16;
+  fill(255, 180, 180);
+  stroke(200,0,0);
+  strokeWeight(2);
+  rect(closeX, closeY, hintBoxCloseW, hintBoxCloseH, 12);
+  fill(120,0,0);
+  noStroke();
+  textSize(22);
+  text('關閉', closeX + hintBoxCloseW/2, closeY + hintBoxCloseH/2);
+  textAlign(CENTER, CENTER);
+}
+
+// ====== 檢查手指是否碰觸關閉按鈕並停留3秒 ======
+function checkCloseHintGesture() {
+  if (!showHintBox) return;
+  if (predictions.length > 0) {
+    let index = predictions[0].landmarks[8];
+    let x = index[0];
+    let y = index[1];
+    let bx = width/2 - hintBoxW/2;
+    let by = height/2 - hintBoxH/2;
+    let closeX = bx + hintBoxW - hintBoxCloseW - 16;
+    let closeY = by + hintBoxH - hintBoxCloseH - 16;
+    if (x > closeX && x < closeX + hintBoxCloseW && y > closeY && y < closeY + hintBoxCloseH) {
+      if (!closeHintHoldStart) closeHintHoldStart = millis();
+      let holdTime = millis() - closeHintHoldStart;
+      fill(255,0,0);
+      textSize(16);
+      let sec = Math.ceil((3000 - holdTime) / 1000);
+      if (sec > 0) {
+        text(`將於 ${sec} 秒後關閉提示`, closeX + hintBoxCloseW/2, closeY - 18);
+      }
+      if (holdTime >= 3000) {
+        showHintBox = false;
+        closeHintHoldStart = null;
+      }
+    } else {
+      closeHintHoldStart = null;
+    }
+  } else {
+    closeHintHoldStart = null;
+  }
 }
