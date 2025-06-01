@@ -437,21 +437,46 @@ function checkHintButtonGesture() {
 
 // ====== 畫提示框 ======
 function drawHintBox() {
-  let bx = width/2 - hintBoxW/2;
-  let by = height/2 - hintBoxH/2;
+  let boxW = min(hintBoxW, width * 0.9);
+  let boxH = hintBoxH;
+  let bx = width/2 - boxW/2;
+  let by = height/2 - boxH/2;
   // 方框底
   fill(255,255,220);
   stroke(180,140,60);
   strokeWeight(4);
-  rect(bx, by, hintBoxW, hintBoxH, 24);
+  rect(bx, by, boxW, boxH, 24);
   // 文字
   fill(60,40,0);
   noStroke();
   textSize(20);
   textAlign(CENTER, CENTER);
-  text(hintTexts[currentQuestion], bx + hintBoxW/2, by + hintBoxH/2 - 10, hintBoxW-40, hintBoxH-60);
+  let txt = hintTexts[currentQuestion];
+  let txtW = boxW - 40;
+  let txtH = boxH - 60;
+  // 計算自動換行
+  push();
+  let words = txt.split(/(?<=。|？|！|,|，|\s)/g);
+  let lines = [];
+  let line = '';
+  for (let i = 0; i < words.length; i++) {
+    let testLine = line + words[i];
+    if (textWidth(testLine) > txtW && line.length > 0) {
+      lines.push(line);
+      line = words[i];
+    } else {
+      line = testLine;
+    }
+  }
+  if (line.length > 0) lines.push(line);
+  let totalLineH = lines.length * 28;
+  let startY = by + boxH/2 - totalLineH/2 + 4;
+  for (let i = 0; i < lines.length; i++) {
+    text(lines[i], bx + boxW/2, startY + i * 28, txtW, 28);
+  }
+  pop();
   // 關閉按鈕
-  let closeX = bx + hintBoxW - hintBoxCloseW - 16;
+  let closeX = bx + boxW - hintBoxCloseW - 16;
   let closeY = by + hintBoxH - hintBoxCloseH - 16;
   fill(255, 180, 180);
   stroke(200,0,0);
